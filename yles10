@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# Küsi kasutajanime ja salvesta see muutujasse 'username'
+read -p "Sisesta kasutajanimi: " username
+
+# Küsi parooli ja salvesta see muutujasse 'password', kuid trükkimisel seda ei kuvata
+read -s -p "Sisesta parool: " password
+echo # Lisab tühja rea, et pärast parooli sisestamist oleks vahe järgmiste käskudega
+
+# Kontrolli, kas kasutajanimi on tühi
+if [ -z "$username" ]; then
+    echo "Kasutajanimi ei tohi olla tühi!"
+    exit 1
+fi
+
+# Kui grupp on käsurea argumendina lisatud, siis kasuta seda, muidu kasuta gruppi "kylaline"
+group="${1:-kylaline}"
+
+# Kontrolli, kas grupp eksisteerib, kui mitte, siis loo grupp
+if ! getent group "$group" > /dev/null 2>&1; then
+    echo "Grupp '$group' ei eksisteeri. Luuakse grupp..."
+    groupadd "$group"
+fi
+
+# Loo uus kasutaja koos kodukataloogiga ja lisa gruppi
+useradd -m -g "$group" "$username"
+
+# Määra parool kasutajale
+echo "$username:$password" | chpasswd
+
+# Kontrolli, kas kasutaja loomine õnnestus
+if [ $? -eq 0 ]; then
+    echo "Kasutaja '$username' on edukalt loodud ja lisatud gruppi '$group'."
+else
+    echo "Kasutaja loomine ebaõnnestus!"
+    exit 1
+fi
+
+# Loo kaust kodukataloogi /home/kasutajanimi/kataloog/
+mkdir -p "/home/$username/kataloog"
+
+# Loo fail teretulemast_kasutajanimi.txt kausta
+echo "Tere tulemast, $username!" > "/home/$username/kataloog/teretulemast_${username}.txt"
+
+# Muuda faili omanikuks vastav kasutaja
+chown "$username:$group" "/home/$username/kataloog/teretulemast_${username}.txt"
+
+echo "Fail '/home/$username/kataloog/teretulemast_${username}.txt' on loodud."
+
