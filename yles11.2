@@ -1,0 +1,22 @@
+#!/bin/bash
+# Faili olemasolu ja õiguste kontrollija
+# Kasutaja sisestab faili tee ja soovitud õigused, skript kontrollib, kas need on õiged
+
+# Küsime kasutajalt faili nime ja soovitud õigusi
+read -p "Sisesta faili tee: " fail
+read -p "Sisesta soovitud õigused (numbriline): " soovitud_oigused
+
+# Kontrollime, kas fail on olemas ja kas see on fail
+if [ ! -f "$fail" ]; then
+    echo "Hoiatus: $fail ei ole fail!"
+    exit 1
+fi
+
+# Kontrollime faili õigusi
+olemasolevad_oigused=$(stat -c %a "$fail")
+
+if [ "$olemasolevad_oigused" == "$soovitud_oigused" ]; then
+    echo "Fail $fail on olemas ja õigustega korrektselt määratud."
+else
+    echo "Hoiatus: faili $fail õigused on $olemasolevad_oigused, peaksid olema $soovitud_oigused!"
+fi

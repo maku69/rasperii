@@ -1,0 +1,13 @@
+#!/bin/bash
+# Teenuse oleku kontrollija
+# Kasutaja sisestab teenuse nime ja skript kontrollib, kas see on aktiivne või mitte
+
+# Küsime kasutajalt teenuse nime
+read -p "Sisesta teenuse nimi: " teenus
+
+# Kontrollime, kas teenus on aktiivne
+if systemctl is-active --quiet $teenus; then
+    echo "$teenus on aktiivne ja töötab."
+else
+    echo "Hoiatus: $teenus ei ole aktiivne!"
+fi
